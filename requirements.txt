@@ -1,0 +1,7 @@
+requests>=2.31.0
+python-dotenv>=1.2.1
+pandas>=2.3.3
+scikit-learn>=1.7.2
+folium>=0.20.0
+matplotlib>=3.10.7
+numpy>=2.3.5
