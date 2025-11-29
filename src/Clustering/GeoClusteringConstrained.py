@@ -1,15 +1,23 @@
 import logging
 import numpy as np
-from sklearn.cluster import KMeans
-from typing import List
+from k_means_constrained import KMeansConstrained
+from typing import List, Optional
 
 from src.Participant import Participant
 
 logger = logging.getLogger(__name__)
 
-class GeoClusterer:
-    def __init__(self, n_clusters: int = 5, random_state: int = 42):
+class GeoClusteringConstrained:
+    def __init__(
+        self,
+        n_clusters: int = 5,
+        size_min: Optional[int] = None,
+        size_max: Optional[int] = None,
+        random_state: int = 42
+    ):
         self.n_clusters = n_clusters
+        self.size_min = size_min if size_min is not None else 1
+        self.size_max = size_max
         self.random_state = random_state
         self.kmeans = None
         self.cluster_centers = None
@@ -32,11 +40,30 @@ class GeoClusterer:
             )
             self.n_clusters = len(valid_participants)
 
+        # Calculate default size_max if not provided
+        if self.size_max is None:
+            self.size_max = len(valid_participants)
+
+        # Validate constraints
+        total_min = self.n_clusters * self.size_min
+        if total_min > len(valid_participants):
+            logger.warning(
+                f"Minimum cluster size constraint ({self.size_min}) cannot be satisfied "
+                f"with {len(valid_participants)} participants and {self.n_clusters} clusters. "
+                f"Adjusting size_min."
+            )
+            self.size_min = max(1, len(valid_participants) // self.n_clusters)
+
         # Extract x, y coordinates
         coordinates = np.array([[p.geo_data.x, p.geo_data.y] for p in valid_participants])
 
-        # Perform k-means clustering
-        self.kmeans = KMeans(n_clusters=self.n_clusters, random_state=self.random_state)
+        # Perform constrained k-means clustering
+        self.kmeans = KMeansConstrained(
+            n_clusters=self.n_clusters,
+            size_min=self.size_min,
+            size_max=self.size_max,
+            random_state=self.random_state
+        )
         cluster_labels = self.kmeans.fit_predict(coordinates)
         self.cluster_centers = self.kmeans.cluster_centers_
 
@@ -52,7 +79,10 @@ class GeoClusterer:
                 clusters[cluster_id] = []
             clusters[cluster_id].append(participant)
 
-        logger.info(f"Successfully clustered {len(valid_participants)} participants into {self.n_clusters} clusters")
+        logger.info(
+            f"Successfully clustered {len(valid_participants)} participants into "
+            f"{self.n_clusters} clusters with size constraints (min={self.size_min}, max={self.size_max})"
+        )
         for cluster_id, members in clusters.items():
             logger.info(f"Cluster {cluster_id}: {len(members)} participants")
 
@@ -68,6 +98,10 @@ class GeoClusterer:
                 'mean_x': float(np.mean(coords[:, 0])),
                 'mean_y': float(np.mean(coords[:, 1])),
                 'std_x': float(np.std(coords[:, 0])),
-                'std_y': float(np.std(coords[:, 1]))
+                'std_y': float(np.std(coords[:, 1])),
+                'constraints': {
+                    'size_min': self.size_min,
+                    'size_max': self.size_max
+                }
             }
         return stats

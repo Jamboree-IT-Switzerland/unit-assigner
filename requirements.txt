@@ -5,3 +5,4 @@ scikit-learn>=1.7.2
 folium>=0.20.0
 matplotlib>=3.10.7
 numpy>=2.3.5
+k-means-constrained>=0.7.3

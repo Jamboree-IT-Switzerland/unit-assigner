@@ -1,5 +1,7 @@
 # Unit Assigner
 
+## Goals
+
 ## Installation
 
 1. **Clone the repository**:
@@ -23,6 +25,13 @@ pip install -r requirements.txt
 ```bash
 # Edit .env with your Midata API token and other settings
 cp .env.example .env
+```
+
+## Development
+## Run the unit assigner
+
+```bash
+python src\main.py
 ```
 
 # References
