@@ -75,6 +75,21 @@ class Participant:
             'kantonalverband': self.kantonalverband
         }
 
+    def to_csv(self, separator: str = ";"):
+        """Convert participant to CSV string."""
+        fields = [
+            self.vorname,
+            self.nachname,
+            self.pfadiname,
+            self.strasse if self.strasse is not None else "",
+            str(self.hausnummer) if self.hausnummer is not None else "",
+            str(self.plz) if self.plz is not None else "",
+            self.ort,
+            self.abteilung,
+            self.kantonalverband
+        ]
+        return separator.join(fields)
+
     def has_valid_geo(self):
         return self.geo_data is not None and self.geo_data.lat is not None and self.geo_data.lon is not None
 

@@ -34,5 +34,10 @@ cp .env.example .env
 python src\main.py
 ```
 
+
+## Data
+### Input
+- event_participation_export.csv: Export from Midata with participant data.
+
 # References
 - [https://rsandstroem.github.io/tag/folium.html](https://rsandstroem.github.io/tag/folium.html)

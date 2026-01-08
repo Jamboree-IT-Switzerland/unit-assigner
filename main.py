@@ -9,6 +9,7 @@ from src.interactWithLawmanger import LawmangerInteractor
 from src.Participant import Participant
 from src.Clustering.GeoClusteringConstrained import GeoClusteringConstrained
 from src.Clustering.GeoClustering import GeoClustering
+from src.Clustering.DepartmentGeoClustering import DepartmentGeoClustering
 from src.Visualizer import ParticipantVisualizer
 
 logging.basicConfig(
@@ -77,9 +78,9 @@ else:
             ort=row['Ort'],
             land=row['Land'],
             hauptebene=row['Hauptebene'],
-            funktion_im_jamboree=row['Funktion_im_Jamboree'],
-            abteilung=row['Abteilung'],
-            kantonalverband=row['Kantonalverband'],
+            funktion_im_jamboree=row['3) In welcher Funktion meld...'],
+            abteilung=row['5) Aus welcher Pfadiabteilu...'],
+            kantonalverband=row['9) Mein Kantonalverband / M...'],
         )
 
         full_address = participant.get_full_address()
@@ -106,33 +107,46 @@ else:
 
 logger.info(f"\nTotal participants created: {len(participants)}")
 
-# Cluster participants based on geo coordinates
-N_CLUSTERS = max(len(participants) // 36, 1)
-
 # Filter based on participant function
 participants = [p for p in participants if p.is_participant()]
 
-if (CONSTRAINT_ENABLED):
-    logger.info("\nClustering participants with constraints...")
-
-    SIZE_MAX = min(36, len(participants))
-    logger.info(f"Number of clusters: {N_CLUSTERS}, Max cluster size: {SIZE_MAX}")
-    clusterer = GeoClusteringConstrained(n_clusters=N_CLUSTERS, size_min=None, size_max=SIZE_MAX)  # Adjust n_clusters, size_min, size_max as needed
-else:
-    logger.info("\nClustering participants without constraints...")
-    logger.info(f"Number of clusters: {N_CLUSTERS}")
-    clusterer = GeoClustering(n_clusters=N_CLUSTERS)  # Adjust n_clusters as needed
+# Cluster participants by department first, then by geography
+logger.info("\nClustering participants by department and geographic location...")
+SIZE_MAX = 36
+logger.info(f"Max cluster size: {SIZE_MAX}")
+clusterer = DepartmentGeoClustering(size_max=SIZE_MAX)
 clusters = clusterer.cluster_participants(participants)
 
 # Display cluster statistics
 stats = clusterer.get_cluster_statistics(clusters)
 logger.info("\nCluster Statistics:")
 for cluster_id, cluster_stats in stats.items():
-    logger.info(f"Cluster {cluster_id}:")
+    dept_name = cluster_stats['department']
+    sub_cluster = cluster_stats['sub_cluster']
+    cluster_label = f"Cluster {cluster_id} - {dept_name}"
+    if sub_cluster:
+        cluster_label += f" (Sub-cluster {sub_cluster})"
+
+    logger.info(f"{cluster_label}:")
     logger.info(f"  Size: {cluster_stats['size']}")
-    logger.info(f"  Center: ({cluster_stats['center'][0]:.2f}, {cluster_stats['center'][1]:.2f})")
-    logger.info(f"  Mean: ({cluster_stats['mean_x']:.2f}, {cluster_stats['mean_y']:.2f})")
-    logger.info(f"  Std Dev: ({cluster_stats['std_x']:.2f}, {cluster_stats['std_y']:.2f})")
+    logger.info(f"  Geographic Center: ({cluster_stats['mean_x']:.2f}, {cluster_stats['mean_y']:.2f})")
+    logger.info(f"  Geographic Spread: (σx={cluster_stats['std_x']:.2f}, σy={cluster_stats['std_y']:.2f})")
+
+# Export clusters to CSV
+logger.info("\nExporting clusters to CSV...")
+csv_output_path = './export/clusters_export.csv'
+csv_separator = ';'
+with open(csv_output_path, 'w', encoding='utf-8') as f:
+    # Write header
+    header = csv_separator.join(["Cluster", "Vorname", "Nachname", "Pfadiname", "Strasse", "Hausnummer", "PLZ", "Ort", "Abteilung", "Kantonalverband"]) + "\n"
+    f.write(header)
+
+    # Write each participant with their cluster assignment
+    for cluster_id, cluster_participants in clusters.items():
+        for participant in cluster_participants:
+            f.write(f"{cluster_id};{participant.to_csv(separator=csv_separator)}\n")
+
+logger.info(f"Clusters exported to {csv_output_path}")
 
 # Visualize participants on map
 logger.info("\nGenerating visualizations...")

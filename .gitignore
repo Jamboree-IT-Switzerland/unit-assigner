@@ -142,5 +142,7 @@ test_*.sqlite
 
 *.log
 
-data/*
+data/*/event_participation_export*
+data/event_participation_export*
+
 export/*
