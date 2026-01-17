@@ -71,6 +71,7 @@ else:
     logger.info("RELOAD_DATA is enabled. Proceeding to create participants from CSV.")
     for index, row in df.iterrows():
         participant = Participant(
+            id=row['Id'],
             vorname=row['Vorname'],
             nachname=row['Nachname'],
             pfadiname=row['Pfadiname'],
