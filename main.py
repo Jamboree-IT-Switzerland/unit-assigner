@@ -38,6 +38,9 @@ LAWMANAGER_BASE_URL = os.getenv("LAWMANAGER_BASE_URL")
 EXPORT_PKL_PATH = './export/participants_with_geo.pkl'
 lawmangerInteractor = LawmangerInteractor(base_url=LAWMANAGER_BASE_URL)
 
+# Ensure export directory exists
+os.makedirs('./export', exist_ok=True)
+
 # Read csv
 if IS_DEV:
     logger.info("Loading development dataset...")

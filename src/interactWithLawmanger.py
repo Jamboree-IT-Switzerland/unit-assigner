@@ -8,7 +8,7 @@ class LawmangerInteractor:
 
     def search_address(self, search_query: str, k=1) -> Geodata | None:
         params = {"search": search_query}
-        response = requests.get(self.BASE_URL, params=params)
+        response = requests.get(self.BASE_URL + "/api/geoadmin/addressSearch", params=params)
         response.raise_for_status()
         response = response.json()
 
