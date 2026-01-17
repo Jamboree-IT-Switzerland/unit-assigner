@@ -141,7 +141,7 @@ csv_output_path = './export/clusters_export.csv'
 csv_separator = ';'
 with open(csv_output_path, 'w', encoding='utf-8') as f:
     # Write header
-    header = csv_separator.join(["Cluster", "Vorname", "Nachname", "Pfadiname", "Strasse", "Hausnummer", "PLZ", "Ort", "Abteilung", "Kantonalverband"]) + "\n"
+    header = csv_separator.join(["Cluster", "Id", "Vorname", "Nachname", "Pfadiname", "Strasse", "Hausnummer", "PLZ", "Ort", "Abteilung", "Kantonalverband"]) + "\n"
     f.write(header)
 
     # Write each participant with their cluster assignment

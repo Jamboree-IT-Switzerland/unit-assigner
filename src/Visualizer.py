@@ -78,6 +78,7 @@ class ParticipantVisualizer:
             # Create popup text
             popup_text = f"""
             <b>{participant.pfadiname or participant.vorname}</b><br>
+            ID: {participant.id}<br>
             {participant.vorname} {participant.nachname}<br>
             {participant.plz} {participant.ort}<br>
             Abteilung: {participant.hauptebene}<br>

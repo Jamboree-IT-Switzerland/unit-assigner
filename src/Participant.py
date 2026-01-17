@@ -4,8 +4,9 @@ from math import nan
 from .Geodata import Geodata
 
 class Participant:
-    def __init__(self, vorname: str, nachname: str, pfadiname: str, strasse: str, hausnummer: int, postfach: int,
+    def __init__(self, id: int, vorname: str, nachname: str, pfadiname: str, strasse: str, hausnummer: int, postfach: int,
                  plz: int, ort: str, land: str, hauptebene: str, funktion_im_jamboree: str, abteilung: str, kantonalverband: str):
+        self.id = id
         self.vorname = vorname if pd.notna(vorname) else ""
         self.nachname = nachname if pd.notna(nachname) else ""
         self.pfadiname = pfadiname if pd.notna(pfadiname) else ""
@@ -31,7 +32,7 @@ class Participant:
                 f"pfadiname='{self.pfadiname}', hauptebene='{self.hauptebene}')")
 
     def __str__(self):
-        return f"{self.vorname} {self.nachname} ({self.pfadiname}) - {self.hauptebene}"
+        return f"{self.id} {self.vorname} {self.nachname} ({self.pfadiname}) - {self.hauptebene}"
 
     def get_full_name(self):
         return f"{self.vorname} {self.nachname} - {self.pfadiname}"
@@ -60,6 +61,7 @@ class Participant:
     def to_dict(self):
         """Convert participant to dictionary."""
         return {
+            'id': self.id,
             'vorname': self.vorname,
             'nachname': self.nachname,
             'pfadiname': self.pfadiname,
@@ -78,6 +80,7 @@ class Participant:
     def to_csv(self, separator: str = ";"):
         """Convert participant to CSV string."""
         fields = [
+            str(self.id),
             self.vorname,
             self.nachname,
             self.pfadiname,
